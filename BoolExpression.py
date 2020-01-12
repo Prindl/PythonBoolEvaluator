@@ -130,9 +130,7 @@ class BooleanExpression:
                     indices.append((last_index, i-last_index, last_op))
                     last_op = x
                     last_index = i
-            if last_index < len(operator_array)-1:
-                indices.append((last_index, len(operator_array)-last_index, last_op))
-            elif last_index == len(operator_array)-1:
+            if last_index <= len(operator_array)-1:
                 indices.append((last_index, len(operator_array)-last_index, last_op))
             return indices
 
