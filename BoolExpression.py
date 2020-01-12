@@ -84,19 +84,20 @@ class BooleanExpression:
         new_arr = []
         last_index = 0
         for i, x in enumerate(indices):
-            if x[2] == operator:
+            index, length, op = x
+            if op == operator:
                 if i > 0:
                     #add all elements from last index that were before the operator
-                    new_arr += bool_array[last_index:x[0]]
+                    new_arr += bool_array[last_index:index]
                 #set last index to after the operators
-                last_index = x[0] + x[1] + 1
+                last_index = index + length + 1
                 #exclude lowest priority operator(logical OR)
                 if operator in BooleanExpression.operators_by_priority[0:-1]:
                     #evaluate the expression
                     if operator.find("or") != -1:
-                        new_arr.append(BooleanExpression._evaluate_or(bool_array[x[0]:x[0]+x[1]+1]))
+                        new_arr.append(BooleanExpression._evaluate_or(bool_array[index:last_index]))
                     elif operator.find("and") != -1:
-                        new_arr.append(BooleanExpression._evaluate_and(bool_array[x[0]:x[0]+x[1]+1]))
+                        new_arr.append(BooleanExpression._evaluate_and(bool_array[index:last_index]))
             elif i == len(indices)-1:
                 #if the last element is not an operator
                 #add all the elements from last index to the end of the array
