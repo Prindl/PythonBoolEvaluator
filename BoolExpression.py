@@ -1,5 +1,3 @@
-import itertools
-
 class BooleanExpression:
 
     class BoolExprError(Exception):pass
