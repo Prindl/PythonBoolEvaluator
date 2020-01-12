@@ -1,3 +1,4 @@
+import itertools
 
 class BooleanExpression:
 
@@ -157,7 +158,7 @@ class BooleanExpression:
         bools = self.bool_array
         operators = self.operator_array
         print(self)
-        for i, operator in enumerate(BooleanExpression.operators_by_priority[0:-1]):
+        for operator in BooleanExpression.operators_by_priority[0:-1]:
             if operator not in operators:
                 #if the operator is not found, skip to the next one
                 continue
@@ -197,7 +198,7 @@ class BooleanExpression:
         #exclude lowest priority operator
         bools = self.bool_array
         operators = self.operator_array
-        for i, operator in enumerate(BooleanExpression.operators_by_priority[0:-1]):
+        for operator in BooleanExpression.operators_by_priority[0:-1]:
             if operator not in operators:
                 #if the operator is not found, skip to the next one
                 continue
@@ -228,8 +229,8 @@ class BooleanExpression:
 
         """
         s = ""
-        for i, x in enumerate(self.bool_array[0:-1]):
-                s += " ".join([str(x), self.operator_array[i]]) + " "
+        for value, operator in zip(self.bool_array, self.operator_array):
+                s += " ".join([str(value), operator]) + " "
         s += str(self.bool_array[-1])
         return s.strip()
         
