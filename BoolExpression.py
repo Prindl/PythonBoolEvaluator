@@ -103,6 +103,47 @@ class BooleanExpression:
                 break
         return new_arr
 
+    def _split_and_eval2(bool_array, indices, op):
+        """
+        Splits the expression at the given operators and evaluates the sub arrays.
+        Example:
+        --------
+            BooleanExression._split_and_eval([True, False, True], ["!or", "and"])
+            True !or False and True is equal to:
+           (True  or False) and True
+            True and True; after evaluating !or
+            True; after evaluating and
+
+        Parameters:
+        -----------
+            bool_array: a list of bool values
+            indices: a list of all consecutive operator indices
+            operator: the operator to evaluate
+
+        Returns:
+        --------
+            list: new list of bool values, after operator was evaluated
+        """
+        new_arr = []
+        start_index = 0
+        for i, x in enumerate(indices):
+            index, length = x
+            if index > 0:
+                #add all elements from last index that were before the operator
+                new_arr += bool_array[start_index:index]
+            #set start index to after the operators
+            start_index = index + length + 1
+            #evaluate the expression
+            if op.find("or") != -1:
+                new_arr.append(BooleanExpression._evaluate_or(bool_array[index:start_index]))
+            elif op.find("and") != -1:
+                new_arr.append(BooleanExpression._evaluate_and(bool_array[index:start_index]))
+        if start_index < len(bool_array):
+            #if the last element is not an operator
+            #add all the elements from last index to the end of the array
+            new_arr += bool_array[start_index:]
+        return new_arr
+
     def _create_indices(operator_array):
         """
         Creates an index list for a given operator list.
@@ -134,6 +175,38 @@ class BooleanExpression:
                 indices.append((last_index, len(operator_array)-last_index, last_op))
             return indices
 
+    def _create_indices2(operator_array, operator):
+        """
+        Creates an index list for a given operator list.
+        Each index is the starting index for a sequence of the same operators.
+        Example: (0, 1, "or")
+        This index starts at 0 and has 1 "or" operator(s).
+
+        Parameters:
+        -----------
+            operator_array: a list of operators(as strings)
+
+        Returns:
+        --------
+            list: a list containing all indices for each operator sequence as a touple
+
+        """
+        if len(operator_array) > 0:
+            indices = []
+            count_op = 0
+            last_index = 0
+            for i, x in enumerate(operator_array):
+                if x == operator:
+                    count_op += 1
+                else:
+                    if count_op > 0:
+                        indices.append((i - count_op, count_op))
+                        count_op = 0
+                    last_index = i + 1
+            if count_op > 0:
+                indices.append((last_index, count_op))
+            return indices
+
     #-------------- INSTANCE FUNCTIONS ---------------
     def __init__(self, bool_array, operator_array):
         if len(bool_array)-1 != len(operator_array):
@@ -153,6 +226,7 @@ class BooleanExpression:
         """
         #exclude lowest priority operator
         bools = self.bool_array
+        bools2 = self.bool_array
         operators = self.operator_array
         print(self)
         for operator in BooleanExpression.operators_by_priority[0:-1]:
@@ -163,8 +237,14 @@ class BooleanExpression:
             #create indices for all operators
             #(index, length of consecutive operators, operator type)
             indices = BooleanExpression._create_indices(operators)
+            print(indices)
+            indices2 = BooleanExpression._create_indices2(operators, operator)
+            print(indices2)
             #split array at the given operator and evaluate sub arrays
             bools = BooleanExpression._split_and_eval(bools, indices, operator)
+            bools2 = BooleanExpression._split_and_eval2(bools2, indices2, operator)
+            print(bools)
+            print(bools2)
             #remove the operators that were evaluated above
             operators = [op for op in operators if op != operator]
             print(BooleanExpression(bools, operators))
@@ -172,6 +252,7 @@ class BooleanExpression:
                 #print("Zero Len:", bool_array)
                 print("Zero Length: " + str(bools[0]))
         #eval lowest priority operator
+        print("R2:", BooleanExpression._evaluate_or(bools2))
         if BooleanExpression.operators_by_priority[-1].find("or") != -1:
             print("Result: " + str(BooleanExpression._evaluate_or(bools)))
         elif BooleanExpression.operators_by_priority[-1].find("and") != -1:
@@ -276,8 +357,9 @@ if __name__ == "__main__":
             else:
                 o.append("or")
         return BooleanExpression(b, o[0:-1])
+    bool_expression_from_string("True !and False !or False !and False or False and False or False and True and False !or False or False !or True and True and True and False")._debug_eval()
 
-    for m in range(1):
+    for m in range(0):
         print("-------- NEW EXPRESSION --------")
         expr = rand_expression()
         expr._debug_eval()
